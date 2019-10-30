@@ -29,6 +29,7 @@ public class ControllerInterface implements Initializable {
 
     @FXML
     private Pane drawingPane;
+    private Pane imgPane;
     @FXML
     private VBox labelList = new VBox();
 
@@ -107,6 +108,30 @@ public class ControllerInterface implements Initializable {
                 Image image = new Image(imageFile);
                 imageView.setImage(image);
                 imageView.setStyle("align: CENTER;");
+
+
+
+
+
+
+
+
+                imageView.setOnMousePressed(event -> {
+                    boxes.add(currentBox = new Box(drawingPane, event.getX(), event.getY()));
+                    nbBoxes++;
+                });
+
+                imageView.setOnMouseDragged(event -> {
+                    currentBox.render(event.getX(), event.getY());
+                });
+
+                imageView.setOnMouseReleased(event -> {
+                    // TODO
+                    currentBox.setLabel("Label" + nbBoxes);
+                    repaintLabels();
+                });
+
+
 
 
 
