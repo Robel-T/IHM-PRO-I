@@ -1,9 +1,7 @@
 package model;
 
-import javafx.geometry.Point2D;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 import java.util.Random;
@@ -30,6 +28,7 @@ public class Box {
         color = Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255), 1);
         rectangle.setStroke(color);
         this.drawingPane.getChildren().add(rectangle);
+
     }
 
     /**
@@ -78,7 +77,16 @@ public class Box {
         return color;
     }
 
+
     public Rectangle getRectangle() {
         return rectangle;
+    }
+
+    public double getStartX(){
+        return getStartX();
+    }
+
+    public double getStartY(){
+        return getStartY();
     }
 }

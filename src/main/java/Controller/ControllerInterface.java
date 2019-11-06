@@ -1,22 +1,21 @@
 package Controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Box;
-import model.JsonObjectMapper;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -35,12 +34,19 @@ public class ControllerInterface implements Initializable {
 
     @FXML
     private Pane drawingPane;
-    @FXML
-    private VBox labelList = new VBox();
 
-    @FXML private ImageView imageView;
-    @FXML private Button btnAdd;
-    @FXML private Button save;
+    @FXML
+    private ListView<Button> listView;
+    private final static ObservableList<Button> listItems = FXCollections.observableArrayList();
+
+
+    @FXML
+    private ImageView imageView;
+    @FXML
+    private Button btnAdd;
+    @FXML
+    private Button save;
+
 
     private String imageFile;
 
@@ -50,27 +56,16 @@ public class ControllerInterface implements Initializable {
         boxes = new LinkedList<>();
         nbBoxes = 0;
         imageView.setVisible(false);
+        listView.setItems(listItems);
+        listView.setStyle("-fx-background-color: #2B2B2B");
 
-        drawingPane.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            boxes.add(currentBox = new Box(drawingPane, event.getX(), event.getY()));
-            nbBoxes++;
-        });
-
-        drawingPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-            currentBox.render(event.getX(), event.getY());
-        });
-
-        // Give options (annotate, cancel,...)
-        drawingPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
-            // TODO
-            currentBox.setLabel("Label" + nbBoxes);
-            repaintLabels();
-        });
+        listView.setVisible(false);
     }
 
     public void repaintLabels() {
-        labelList.getChildren().clear();
-        for(Box box : boxes) {
+        listView.getItems().clear();
+
+        for (Box box : boxes) {
             Button button = new Button();
             button.setText(box.getLabel());
             Circle circle = new Circle(10);
@@ -79,12 +74,14 @@ public class ControllerInterface implements Initializable {
             button.setStyle("-fx-border-width: 0");
             button.setStyle("-fx-fill-width: true");
 
-            labelList.getChildren().add(button);
+            listView.setVisible(true);
+            listItems.add(button);
         }
     }
 
     /**
      * Save current file
+     *
      * @param mouseEvent
      */
     public void btnSaveFile(MouseEvent mouseEvent) {
@@ -93,18 +90,18 @@ public class ControllerInterface implements Initializable {
             FileChooser fileChooser = new FileChooser();
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
             fileChooser.getExtensionFilters().add(extFilter);
-            File file = fileChooser.showSaveDialog( Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
+            File file = fileChooser.showSaveDialog(Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
 
             if (file != null) {
                 String textFile = "";
                 textFile += imageFile;
-                for(Box box : boxes) {
+                for (Box box : boxes) {
                     textFile += "\n" +
-                        box.getRectangle().getX() + "\n" +
-                        box.getRectangle().getY() + "\n" +
-                        box.getRectangle().getWidth() + "\n" +
-                        box.getRectangle().getHeight() + "\n" +
-                        box.getLabel();
+                            box.getRectangle().getX() + "\n" +
+                            box.getRectangle().getY() + "\n" +
+                            box.getRectangle().getWidth() + "\n" +
+                            box.getRectangle().getHeight() + "\n" +
+                            box.getLabel();
                 }
                 saveTextToFile(textFile, file);
             }
@@ -113,6 +110,7 @@ public class ControllerInterface implements Initializable {
 
     /**
      * Open a file, parse and render it
+     *
      * @param mouseEvent
      */
     public void btnOpenFile(MouseEvent mouseEvent) throws IOException {
@@ -126,7 +124,7 @@ public class ControllerInterface implements Initializable {
             fileChooser.getExtensionFilters().addAll(
                     new FileChooser.ExtensionFilter("Files",
                             "*.txt", "*.json")); // limit fileChooser options to image files
-            File selectedFile = fileChooser.showOpenDialog( Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
+            File selectedFile = fileChooser.showOpenDialog(Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
 
             if (selectedFile != null) {
 
@@ -136,11 +134,12 @@ public class ControllerInterface implements Initializable {
 
                 /* first line : image path */
                 imageFile = br.readLine();
-                while((line = br.readLine()) != null) {
+                System.out.println(imageFile);
+                while ((line = br.readLine()) != null) {
                     double x, y, height, width;
                     String label;
                     x = Float.valueOf(line);
-                    y =  Float.valueOf(br.readLine());
+                    y = Float.valueOf(br.readLine());
                     width = Float.valueOf(br.readLine());
                     height = Float.valueOf(br.readLine());
                     label = br.readLine();
@@ -151,9 +150,35 @@ public class ControllerInterface implements Initializable {
                 }
 
                 /* place image */
+                btnAdd.setVisible(false);
+                imageView.setVisible(true);
+
                 Image image = new Image(imageFile);
                 imageView.setImage(image);
-                imageView.setStyle("align: CENTER;");
+
+                double aspectRatio = image.getWidth() / image.getHeight();
+                double realWidth = Math.min(imageView.getFitWidth(), imageView.getFitHeight() * aspectRatio);
+                double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
+
+
+                imageView.setOnMousePressed(event -> {
+
+                    boxes.add(currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY()));
+                    nbBoxes++;
+                });
+
+                System.out.println(realWidth + " " + realHeight);
+                imageView.setOnMouseDragged(event -> {
+                    if (event.getSceneX() < realWidth + 19 && event.getSceneY() < realHeight + 88 && event.getSceneX() > 19 && event.getSceneY() > 88) {
+                        currentBox.render(event.getSceneX(), event.getSceneY());
+                    }
+                });
+
+                imageView.setOnMouseReleased(event -> {
+                    // TODO
+                    currentBox.setLabel("Label" + nbBoxes);
+                    repaintLabels();
+                });
 
             } else {
                 System.out.println("Image file selection cancelled.");
@@ -167,17 +192,20 @@ public class ControllerInterface implements Initializable {
             writer = new PrintWriter(file);
             writer.println(content);
             writer.close();
-        } catch (IOException ex) {}
+        } catch (IOException ex) {
+        }
     }
 
     public void btnAddImage(MouseEvent mouseEvent) throws MalformedURLException {
+
+
         if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select Image File");
             fileChooser.getExtensionFilters().addAll(
                     new FileChooser.ExtensionFilter("Image Files",
                             "*.bmp", "*.png", "*.jpg", "*.gif")); // limit fileChooser options to image files
-            File selectedFile = fileChooser.showOpenDialog( Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
+            File selectedFile = fileChooser.showOpenDialog(Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
 
             if (selectedFile != null) {
 
@@ -187,7 +215,31 @@ public class ControllerInterface implements Initializable {
 
                 Image image = new Image(imageFile);
                 imageView.setImage(image);
-                imageView.setStyle("align: CENTER;");
+
+                double aspectRatio = image.getWidth() / image.getHeight();
+                double realWidth = Math.min(imageView.getFitWidth(), imageView.getFitHeight() * aspectRatio);
+                double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
+
+
+                imageView.setOnMousePressed(event -> {
+
+                    boxes.add(currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY()));
+                    nbBoxes++;
+                });
+
+                System.out.println(realWidth + " " + realHeight);
+                imageView.setOnMouseDragged(event -> {
+                    if (event.getSceneX() < realWidth + 19 && event.getSceneY() < realHeight + 88 && event.getSceneX() > 19 && event.getSceneY() > 88) {
+                        currentBox.render(event.getSceneX(), event.getSceneY());
+                    }
+                });
+
+                imageView.setOnMouseReleased(event -> {
+                    // TODO
+                    currentBox.setLabel("Label" + nbBoxes);
+                    repaintLabels();
+                });
+
 
             } else {
                 System.out.println("Image file selection cancelled.");
