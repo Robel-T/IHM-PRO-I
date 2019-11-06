@@ -32,6 +32,23 @@ public class Box {
         this.drawingPane.getChildren().add(rectangle);
     }
 
+    /**
+     * Constructor needed if we want to set rectangle properties
+     * as instance (load from file)
+     * @param drawingPane
+     * @param startX
+     * @param startY
+     * @param width
+     * @param height
+     */
+    public Box(Pane drawingPane, double startX, double startY, double width, double height) {
+        this(drawingPane, startX, startY);
+        rectangle.setWidth(width);
+        rectangle.setHeight(height);
+        rectangle.setX(startX);
+        rectangle.setY(startY);
+    }
+
     public void render(double endX, double endY) {
 
         if(endX < startX) {
@@ -59,5 +76,9 @@ public class Box {
 
     public Color getColor() {
         return color;
+    }
+
+    public Rectangle getRectangle() {
+        return rectangle;
     }
 }
