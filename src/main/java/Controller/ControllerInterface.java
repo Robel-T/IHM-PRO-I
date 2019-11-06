@@ -1,14 +1,16 @@
 package Controller;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -29,13 +31,14 @@ public class ControllerInterface implements Initializable {
 
     @FXML
     private Pane drawingPane;
-    private Pane imgPane;
+
     @FXML
-    private VBox labelList = new VBox();
+    private ListView<Button> listView;
+    private final static ObservableList<Button> listItems = FXCollections.observableArrayList();
+
 
     @FXML private ImageView imageView;
     @FXML private Button btnAdd;
-
 
 
 
@@ -48,6 +51,10 @@ public class ControllerInterface implements Initializable {
         boxes = new LinkedList<>();
         nbBoxes = 0;
         imageView.setVisible(false);
+        listView.setItems(listItems);
+        listView.setStyle("-fx-background-color: #2B2B2B" );
+
+        listView.setVisible(false);
 
 
 /*
@@ -74,7 +81,8 @@ public class ControllerInterface implements Initializable {
     }
 
     public void repaintLabels() {
-        labelList.getChildren().clear();
+        listView.getItems().clear();
+
         for(Box box : boxes) {
             Button button = new Button();
             button.setText(box.getLabel());
@@ -84,12 +92,16 @@ public class ControllerInterface implements Initializable {
             button.setStyle("-fx-border-width: 0");
             button.setStyle("-fx-fill-width: true");
 
-            labelList.getChildren().add(button);
+            listView.setVisible(true);
+            listItems.add(button);
         }
     }
 
 
     public void btnAddImage(MouseEvent mouseEvent) throws MalformedURLException {
+
+
+
         if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select Image File");
@@ -107,22 +119,22 @@ public class ControllerInterface implements Initializable {
 
                 Image image = new Image(imageFile);
                 imageView.setImage(image);
-                imageView.setStyle("align: CENTER;");
 
-
-
-
-
-
+                double aspectRatio = image.getWidth() / image.getHeight();
+                double realWidth = Math.min(imageView.getFitWidth(), imageView.getFitHeight() * aspectRatio);
+                double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
 
 
                 imageView.setOnMousePressed(event -> {
-                    boxes.add(currentBox = new Box(drawingPane, event.getX(), event.getY()));
+
+                      boxes.add(currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY()));
                     nbBoxes++;
                 });
 
+                System.out.println(realWidth + " " + realHeight);
                 imageView.setOnMouseDragged(event -> {
-                    currentBox.render(event.getX(), event.getY());
+                    if(event.getSceneX() < realWidth+19 && event.getSceneY() < realHeight+88 && event.getSceneX() > 19 && event.getSceneY()>88){
+                        currentBox.render(event.getSceneX(), event.getSceneY());}
                 });
 
                 imageView.setOnMouseReleased(event -> {

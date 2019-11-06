@@ -59,4 +59,12 @@ public class Box {
     public Color getColor() {
         return color;
     }
+
+    public double getStartX(){
+        return getStartX();
+    }
+
+    public double getStartY(){
+        return getStartY();
+    }
 }
