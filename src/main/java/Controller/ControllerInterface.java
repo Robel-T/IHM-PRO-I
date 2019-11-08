@@ -4,63 +4,73 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Control;
-import javafx.scene.control.ListView;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import model.Box;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class ControllerInterface implements Initializable {
 
-    private List<Box> boxes;
-    private Box currentBox;
+    private  List<Box> boxes;
+    public  Box currentBox;
     private int nbBoxes;
+    private GridPane gridPane;
 
     @FXML
     private Pane drawingPane;
 
+
+
     @FXML
-    private ListView<Button> listView;
-    private final static ObservableList<Button> listItems = FXCollections.observableArrayList();
+    private  ListView<Button> listView;
+    private final  ObservableList<Button> listItems = FXCollections.observableArrayList();
 
 
     @FXML
     private ImageView imageView;
     @FXML
     private Button btnAdd;
-    @FXML
-    private Button save;
+
+
 
 
     private String imageFile;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        try{
 
-        boxes = new LinkedList<>();
-        nbBoxes = 0;
-        imageView.setVisible(false);
-        listView.setItems(listItems);
-        listView.setStyle("-fx-background-color: #2B2B2B");
+            boxes = new LinkedList<>();
+            nbBoxes = 0;
+            imageView.setVisible(false);
+            listView.setItems(listItems);
+            listView.setStyle("-fx-background-color: #2B2B2B");
 
-        listView.setVisible(false);
+            listView.setVisible(false);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
+
+
 
     public void repaintLabels() {
         listView.getItems().clear();
@@ -169,7 +179,7 @@ public class ControllerInterface implements Initializable {
 
                 System.out.println(realWidth + " " + realHeight);
                 imageView.setOnMouseDragged(event -> {
-                    if (event.getSceneX() < realWidth + 19 && event.getSceneY() < realHeight + 88 && event.getSceneX() > 19 && event.getSceneY() > 88) {
+                    if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
                         currentBox.render(event.getSceneX(), event.getSceneY());
                     }
                 });
@@ -195,6 +205,7 @@ public class ControllerInterface implements Initializable {
         } catch (IOException ex) {
         }
     }
+
 
     public void btnAddImage(MouseEvent mouseEvent) throws MalformedURLException {
 
@@ -223,28 +234,84 @@ public class ControllerInterface implements Initializable {
 
                 imageView.setOnMousePressed(event -> {
 
-                    boxes.add(currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY()));
-                    nbBoxes++;
+                    currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY());
                 });
 
                 System.out.println(realWidth + " " + realHeight);
                 imageView.setOnMouseDragged(event -> {
-                    if (event.getSceneX() < realWidth + 19 && event.getSceneY() < realHeight + 88 && event.getSceneX() > 19 && event.getSceneY() > 88) {
+                    if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
                         currentBox.render(event.getSceneX(), event.getSceneY());
                     }
                 });
 
                 imageView.setOnMouseReleased(event -> {
-                    // TODO
-                    currentBox.setLabel("Label" + nbBoxes);
-                    repaintLabels();
+                    toolbox(event.getSceneX(),event.getSceneY(),currentBox);
                 });
-
 
             } else {
                 System.out.println("Image file selection cancelled.");
             }
         }
+    }
+
+    private void toolbox(double x, double y,Box currentBox){
+        gridPane = new GridPane();
+
+        // ToolboxInterface toolboxInterface = new ToolboxInterface(currentBox);
+        Stage fenetre = new Stage();
+
+        //toolboxInterface.start(stage);
+        fenetre.setTitle("ToolBox");
+        fenetre.initStyle(StageStyle.UNDECORATED);
+        fenetre.setResizable(false);
+
+        fenetre.setX(currentBox.getStartX()+20);
+        System.out.println(currentBox.getStartX() + " " + fenetre.getX());
+
+        fenetre.setY(currentBox.getStartY());
+
+
+        gridPane.setAlignment(Pos.CENTER);
+        gridPane.setHgap(10);
+        gridPane.setVgap(10);
+        gridPane.setPadding(new Insets(5, 25, 25, 25));
+
+
+        final TextField label = new TextField();
+        label.setPromptText("Enter your first name.");
+        label.setPrefColumnCount(10);
+
+        gridPane.add(label, 0, 1);
+
+        final Label notif = new Label("Robel");
+
+        ImageView delete = new ImageView("./images/poubelle.png");
+        delete.setFitHeight(20);
+        delete.setFitWidth(20);
+        delete.setOnMouseClicked((MouseEvent Mevent) -> {
+            fenetre.close();
+
+        });
+
+        ImageView ok = new ImageView("./images/ok.png");
+        ok.setFitHeight(20);
+        ok.setFitWidth(20);
+        ok.setOnMouseClicked((MouseEvent Mevent) -> {
+            currentBox.setLabel(label.getText());
+            boxes.add(currentBox);
+            nbBoxes++;
+            repaintLabels();
+            fenetre.close();
+        });
+
+        gridPane.add(delete, 1, 1);
+        gridPane.add(ok,2,1);
+        gridPane.setBackground(new Background(new BackgroundFill(Color.valueOf("#2B2B2B"), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        final Scene scene = new Scene(gridPane);
+        fenetre.setScene(scene);
+        fenetre.show();
+
     }
 }
 

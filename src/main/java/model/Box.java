@@ -83,10 +83,10 @@ public class Box {
     }
 
     public double getStartX(){
-        return getStartX();
+        return startX;
     }
 
     public double getStartY(){
-        return getStartY();
+        return startY;
     }
 }
