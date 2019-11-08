@@ -142,7 +142,12 @@ public class ControllerInterface implements Initializable {
 
         if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
 
+            for(Box box : boxes) {
+                drawingPane.getChildren().remove(box.getRectangle());
+            }
+            toolBoxes.clear();
             boxes.clear();
+            repaintLabels();
 
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select File");
@@ -169,9 +174,14 @@ public class ControllerInterface implements Initializable {
                     height = Float.valueOf(br.readLine());
                     label = br.readLine();
 
-                    Box box = new Box(drawingPane, x, y, width, height);
-                    box.setLabel(label);
-                    boxes.add(currentBox = box);
+                    currentBox = new Box(drawingPane, x, y, width, height);
+                    currentBox.setLabel(label);
+
+                    /* create toolboxes related to imported boxes */
+                    toolbox(currentBox);
+                    for(Stage stage : toolBoxes) {
+                        stage.close();
+                    }
                 }
 
                 /* place image */
@@ -179,6 +189,8 @@ public class ControllerInterface implements Initializable {
                 imageView.setVisible(true);
 
                 enableDrawing();
+                shouldDrawNewBox = true;
+                repaintLabels();
 
             } else {
                 System.out.println("Image file selection cancelled.");

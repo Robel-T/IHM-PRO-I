@@ -24,7 +24,7 @@
                     <children>
                         <Pane fx:id="drawingPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" style="-fx-background-color: #8E8989;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                                <Button fx:id="btnAdd" contentDisplay="CENTER" layoutX="220.0" layoutY="280.0" mnemonicParsing="false" onMouseClicked="#btnAddImage" text="Ajouter une image" textAlignment="CENTER" textOverrun="CENTER_ELLIPSIS" />
+                                <Button fx:id="btnAdd" contentDisplay="CENTER" layoutX="220.0" layoutY="280.0" mnemonicParsing="false" onMouseClicked="#btnAddImage" text="Add image" textAlignment="CENTER" textOverrun="CENTER_ELLIPSIS" />
                                 <ImageView fx:id="imageView" fitHeight="550.0" fitWidth="540.0" layoutX="10.0" layoutY="25.0" pickOnBounds="true" preserveRatio="true" />
                             </children>
                         </Pane>
