@@ -32,38 +32,36 @@ public class ControllerInterface implements Initializable {
     public  Box currentBox;
     private int nbBoxes;
     private GridPane gridPane;
+    private Stage primaryStage;
+    private String imageFile;
 
     @FXML
     private Pane drawingPane;
 
-
-
     @FXML
     private  ListView<Button> listView;
     private final  ObservableList<Button> listItems = FXCollections.observableArrayList();
-
 
     @FXML
     private ImageView imageView;
     @FXML
     private Button btnAdd;
 
-
-
-
-    private String imageFile;
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        try{
+        try {
 
             boxes = new LinkedList<>();
             nbBoxes = 0;
             imageView.setVisible(false);
             listView.setItems(listItems);
             listView.setStyle("-fx-background-color: #2B2B2B");
-
             listView.setVisible(false);
+
         }catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,9 +71,11 @@ public class ControllerInterface implements Initializable {
 
 
     public void repaintLabels() {
+
         listView.getItems().clear();
 
         for (Box box : boxes) {
+
             Button button = new Button();
             button.setText(box.getLabel());
             Circle circle = new Circle(10);
@@ -95,6 +95,7 @@ public class ControllerInterface implements Initializable {
      * @param mouseEvent
      */
     public void btnSaveFile(MouseEvent mouseEvent) {
+
         if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
 
             FileChooser fileChooser = new FileChooser();
@@ -124,9 +125,9 @@ public class ControllerInterface implements Initializable {
      * @param mouseEvent
      */
     public void btnOpenFile(MouseEvent mouseEvent) throws IOException {
+
         if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
 
-            /* clear the current boxes */
             boxes.clear();
 
             FileChooser fileChooser = new FileChooser();
@@ -163,32 +164,7 @@ public class ControllerInterface implements Initializable {
                 btnAdd.setVisible(false);
                 imageView.setVisible(true);
 
-                Image image = new Image(imageFile);
-                imageView.setImage(image);
-
-                double aspectRatio = image.getWidth() / image.getHeight();
-                double realWidth = Math.min(imageView.getFitWidth(), imageView.getFitHeight() * aspectRatio);
-                double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
-
-
-                imageView.setOnMousePressed(event -> {
-
-                    boxes.add(currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY()));
-                    nbBoxes++;
-                });
-
-                System.out.println(realWidth + " " + realHeight);
-                imageView.setOnMouseDragged(event -> {
-                    if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
-                        currentBox.render(event.getSceneX(), event.getSceneY());
-                    }
-                });
-
-                imageView.setOnMouseReleased(event -> {
-                    // TODO
-                    currentBox.setLabel("Label" + nbBoxes);
-                    repaintLabels();
-                });
+                enableDrawing();
 
             } else {
                 System.out.println("Image file selection cancelled.");
@@ -203,14 +179,14 @@ public class ControllerInterface implements Initializable {
             writer.println(content);
             writer.close();
         } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
-
-
+    
     public void btnAddImage(MouseEvent mouseEvent) throws MalformedURLException {
 
-
         if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
+
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select Image File");
             fileChooser.getExtensionFilters().addAll(
@@ -224,29 +200,7 @@ public class ControllerInterface implements Initializable {
                 imageView.setVisible(true);
                 imageFile = selectedFile.toURI().toURL().toString();
 
-                Image image = new Image(imageFile);
-                imageView.setImage(image);
-
-                double aspectRatio = image.getWidth() / image.getHeight();
-                double realWidth = Math.min(imageView.getFitWidth(), imageView.getFitHeight() * aspectRatio);
-                double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
-
-
-                imageView.setOnMousePressed(event -> {
-
-                    currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY());
-                });
-
-                System.out.println(realWidth + " " + realHeight);
-                imageView.setOnMouseDragged(event -> {
-                    if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
-                        currentBox.render(event.getSceneX(), event.getSceneY());
-                    }
-                });
-
-                imageView.setOnMouseReleased(event -> {
-                    toolbox(event.getSceneX(),event.getSceneY(),currentBox);
-                });
+                enableDrawing();
 
             } else {
                 System.out.println("Image file selection cancelled.");
@@ -254,7 +208,33 @@ public class ControllerInterface implements Initializable {
         }
     }
 
-    private void toolbox(double x, double y,Box currentBox){
+    private void enableDrawing() {
+
+        Image image = new Image(imageFile);
+        imageView.setImage(image);
+
+        double aspectRatio = image.getWidth() / image.getHeight();
+        double realWidth = Math.min(imageView.getFitWidth(), imageView.getFitHeight() * aspectRatio);
+        double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
+
+        imageView.setOnMousePressed(event -> {
+            currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY());
+        });
+
+        System.out.println(realWidth + " " + realHeight);
+        imageView.setOnMouseDragged(event -> {
+            if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
+                currentBox.render(event.getSceneX(), event.getSceneY());
+            }
+        });
+
+        imageView.setOnMouseReleased(event -> {
+            toolbox(currentBox);
+        });
+    }
+
+    private void toolbox(Box currentBox) {
+
         gridPane = new GridPane();
 
         // ToolboxInterface toolboxInterface = new ToolboxInterface(currentBox);
@@ -265,20 +245,17 @@ public class ControllerInterface implements Initializable {
         fenetre.initStyle(StageStyle.UNDECORATED);
         fenetre.setResizable(false);
 
-        fenetre.setX(currentBox.getStartX()+20);
-        System.out.println(currentBox.getStartX() + " " + fenetre.getX());
-
-        fenetre.setY(currentBox.getStartY());
-
+        // Set toolbox above rectangle
+        fenetre.setX(currentBox.getRectangle().getX() + primaryStage.getX());
+        fenetre.setY(currentBox.getRectangle().getY() + primaryStage.getY() - 50);
 
         gridPane.setAlignment(Pos.CENTER);
         gridPane.setHgap(10);
         gridPane.setVgap(10);
         gridPane.setPadding(new Insets(5, 25, 25, 25));
 
-
         final TextField label = new TextField();
-        label.setPromptText("Enter your first name.");
+        label.setPromptText("Enter label name.");
         label.setPrefColumnCount(10);
 
         gridPane.add(label, 0, 1);
@@ -290,7 +267,6 @@ public class ControllerInterface implements Initializable {
         delete.setFitWidth(20);
         delete.setOnMouseClicked((MouseEvent Mevent) -> {
             fenetre.close();
-
         });
 
         ImageView ok = new ImageView("./images/ok.png");
@@ -311,7 +287,6 @@ public class ControllerInterface implements Initializable {
         final Scene scene = new Scene(gridPane);
         fenetre.setScene(scene);
         fenetre.show();
-
     }
 }
 

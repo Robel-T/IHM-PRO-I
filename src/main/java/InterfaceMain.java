@@ -1,3 +1,4 @@
+import Controller.ControllerInterface;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,10 +16,14 @@ public class InterfaceMain extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        Parent root = (Parent) loader.load(getClass().getResource("main.fxml").openStream());
         primaryStage.setResizable(true);
         primaryStage.setTitle("Image annotation");
         primaryStage.setScene(new Scene(root, 1000, 600));
         primaryStage.show();
+
+        ControllerInterface mainController = loader.getController();
+        mainController.setPrimaryStage(primaryStage);
     }
 }
