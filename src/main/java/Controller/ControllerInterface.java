@@ -16,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.StageBuilder;
 import javafx.stage.StageStyle;
 import model.Box;
 
@@ -28,8 +29,14 @@ import java.util.ResourceBundle;
 
 public class ControllerInterface implements Initializable {
 
-    private  List<Box> boxes;
-    public  Box currentBox;
+    private List<Box> boxes;
+    private List<Stage> toolBoxes; // Associated to boxes
+
+    private Box currentBox;
+    private Stage currentToolBox;
+
+    private boolean shouldDrawNewBox = true;
+
     private int nbBoxes;
     private GridPane gridPane;
     private Stage primaryStage;
@@ -56,13 +63,15 @@ public class ControllerInterface implements Initializable {
         try {
 
             boxes = new LinkedList<>();
+            toolBoxes = new LinkedList<>();
+
             nbBoxes = 0;
             imageView.setVisible(false);
             listView.setItems(listItems);
             listView.setStyle("-fx-background-color: #2B2B2B");
             listView.setVisible(false);
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -86,6 +95,11 @@ public class ControllerInterface implements Initializable {
 
             listView.setVisible(true);
             listItems.add(button);
+
+            /* Allows to reopen toolbox when clicking on label */
+            button.setOnMouseClicked(event -> {
+                toolBoxes.get(boxes.indexOf(box)).show();
+            });
         }
     }
 
@@ -182,7 +196,7 @@ public class ControllerInterface implements Initializable {
             ex.printStackTrace();
         }
     }
-    
+
     public void btnAddImage(MouseEvent mouseEvent) throws MalformedURLException {
 
         if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
@@ -218,22 +232,28 @@ public class ControllerInterface implements Initializable {
         double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
 
         imageView.setOnMousePressed(event -> {
-            currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY());
+            if(shouldDrawNewBox)
+                currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY());
         });
 
         System.out.println(realWidth + " " + realHeight);
         imageView.setOnMouseDragged(event -> {
-            if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
-                currentBox.render(event.getSceneX(), event.getSceneY());
+            if(shouldDrawNewBox) {
+                if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
+                    currentBox.render(event.getSceneX(), event.getSceneY());
+                }
             }
         });
 
         imageView.setOnMouseReleased(event -> {
-            toolbox(currentBox);
+            if(shouldDrawNewBox)
+                toolbox(currentBox);
         });
     }
 
     private void toolbox(Box currentBox) {
+
+        shouldDrawNewBox = false;
 
         gridPane = new GridPane();
 
@@ -261,12 +281,18 @@ public class ControllerInterface implements Initializable {
         gridPane.add(label, 0, 1);
 
         final Label notif = new Label("Robel");
+        fenetre.setAlwaysOnTop(true);
 
         ImageView delete = new ImageView("./images/poubelle.png");
         delete.setFitHeight(20);
         delete.setFitWidth(20);
         delete.setOnMouseClicked((MouseEvent Mevent) -> {
             fenetre.close();
+            drawingPane.getChildren().remove(currentBox.getRectangle());
+            boxes.remove(boxes.indexOf(currentBox));
+            toolBoxes.remove(toolBoxes.indexOf(fenetre));
+            repaintLabels();
+            shouldDrawNewBox = true;
         });
 
         ImageView ok = new ImageView("./images/ok.png");
@@ -274,15 +300,19 @@ public class ControllerInterface implements Initializable {
         ok.setFitWidth(20);
         ok.setOnMouseClicked((MouseEvent Mevent) -> {
             currentBox.setLabel(label.getText());
-            boxes.add(currentBox);
             nbBoxes++;
             repaintLabels();
             fenetre.close();
+            shouldDrawNewBox = true;
         });
 
         gridPane.add(delete, 1, 1);
         gridPane.add(ok,2,1);
         gridPane.setBackground(new Background(new BackgroundFill(Color.valueOf("#2B2B2B"), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        boxes.add(currentBox);
+        toolBoxes.add(fenetre);
+        currentToolBox = fenetre;
 
         final Scene scene = new Scene(gridPane);
         fenetre.setScene(scene);
