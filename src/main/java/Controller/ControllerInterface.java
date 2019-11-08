@@ -68,7 +68,7 @@ public class ControllerInterface implements Initializable {
             nbBoxes = 0;
             imageView.setVisible(false);
             listView.setItems(listItems);
-            listView.setStyle("-fx-background-color: #2B2B2B");
+            listView.setStyle("-fx-control-inner-background: #2B2B2B");
             listView.setVisible(false);
 
         } catch (Exception e) {
@@ -87,11 +87,16 @@ public class ControllerInterface implements Initializable {
 
             Button button = new Button();
             button.setText(box.getLabel());
-            Circle circle = new Circle(10);
+            button.setTextFill(Color.WHITE);
+            Circle circle = new Circle(7);
             circle.setFill(box.getColor());
+            ImageView imageView = new ImageView();
+
+            button.setMinWidth(180);
+            button.setMaxWidth(180);
             button.setGraphic(circle);
-            button.setStyle("-fx-border-width: 0");
-            button.setStyle("-fx-fill-width: true");
+            button.setStyle("-fx-background-color: transparent");
+            button.setAlignment(Pos.CENTER_LEFT);
 
             listView.setVisible(true);
             listItems.add(button);
