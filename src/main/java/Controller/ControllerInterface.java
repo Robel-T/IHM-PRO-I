@@ -75,9 +75,8 @@ public class ControllerInterface implements Initializable {
             e.printStackTrace();
         }
 
+
     }
-
-
 
     public void repaintLabels() {
 
@@ -104,6 +103,13 @@ public class ControllerInterface implements Initializable {
             /* Allows to reopen toolbox when clicking on label */
             button.setOnMouseClicked(event -> {
                 toolBoxes.get(boxes.indexOf(box)).show();
+
+                /* Hide all others toolboxes (just edit one at time) */
+                for(Stage toolBox : toolBoxes) {
+                    if(!toolBox.equals(toolBoxes.get(boxes.indexOf(box)))) {
+                        toolBox.hide();
+                    }
+                }
             });
         }
     }
