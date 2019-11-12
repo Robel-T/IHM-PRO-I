@@ -323,7 +323,7 @@ public class ControllerInterface implements Initializable {
         final Label notif = new Label("Robel");
         fenetre.setAlwaysOnTop(true);
 
-        ImageView delete = new ImageView("./images/poubelle.png");
+        ImageView delete = new ImageView("poubelle.png");
         delete.setFitHeight(20);
         delete.setFitWidth(20);
         delete.setOnMouseClicked((MouseEvent Mevent) -> {
@@ -335,7 +335,7 @@ public class ControllerInterface implements Initializable {
             shouldDrawNewBox = true;
         });
 
-        ImageView ok = new ImageView("./images/ok.png");
+        ImageView ok = new ImageView("ok.png");
         ok.setFitHeight(20);
         ok.setFitWidth(20);
         ok.setOnMouseClicked((MouseEvent Mevent) -> {
