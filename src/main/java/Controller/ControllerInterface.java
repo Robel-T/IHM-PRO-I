@@ -111,12 +111,16 @@ public class ControllerInterface implements Initializable {
 
             /* Allows to reopen toolbox when clicking on label */
             button.setOnMouseClicked(event -> {
-                toolBoxes.get(boxes.indexOf(box)).show();
+                Stage toolBox = toolBoxes.get(boxes.indexOf(box));
+
+                toolBox.setX(box.getRectangle().getX() + primaryStage.getX());
+                toolBox.setY(box.getRectangle().getY() + primaryStage.getY() - 25);
+                toolBox.show();
 
                 /* Hide all others toolboxes (just edit one at time) */
-                for(Stage toolBox : toolBoxes) {
-                    if(!toolBox.equals(toolBoxes.get(boxes.indexOf(box)))) {
-                        toolBox.hide();
+                for(Stage t : toolBoxes) {
+                    if(!t.equals(toolBox)) {
+                        t.hide();
                     }
                 }
             });
@@ -261,8 +265,11 @@ public class ControllerInterface implements Initializable {
         double realHeight = Math.min(imageView.getFitHeight(), imageView.getFitWidth() / aspectRatio);
 
         imageView.setOnMousePressed(event -> {
-            if(shouldDrawNewBox)
-                currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY()-25);
+            if(shouldDrawNewBox) {
+                currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY() - 25);
+                if(!toolBoxes.isEmpty())
+                    currentToolBox.hide();
+            }
         });
 
         System.out.println(realWidth + " " + realHeight);
@@ -277,7 +284,7 @@ public class ControllerInterface implements Initializable {
         imageView.setOnMouseReleased(event -> {
             if(shouldDrawNewBox)
                 toolbox(currentBox);
-                save.setVisible(true);
+            save.setVisible(true);
         });
     }
 
