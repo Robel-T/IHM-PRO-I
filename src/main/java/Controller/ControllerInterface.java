@@ -1,5 +1,6 @@
 package Controller;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,7 +8,10 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -16,12 +20,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.StageBuilder;
 import javafx.stage.StageStyle;
 import model.Box;
 
+import java.awt.*;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,6 +59,8 @@ public class ControllerInterface implements Initializable {
     private ImageView imageView;
     @FXML
     private Button btnAdd;
+    @FXML
+    private Button save;
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -64,6 +72,7 @@ public class ControllerInterface implements Initializable {
 
             boxes = new LinkedList<>();
             toolBoxes = new LinkedList<>();
+            save.setVisible(false);
 
             nbBoxes = 0;
             imageView.setVisible(false);
@@ -119,14 +128,12 @@ public class ControllerInterface implements Initializable {
      *
      * @param mouseEvent
      */
-    public void btnSaveFile(MouseEvent mouseEvent) {
-
-        if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
+    public void btnSaveFile() {
 
             FileChooser fileChooser = new FileChooser();
             FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
             fileChooser.getExtensionFilters().add(extFilter);
-            File file = fileChooser.showSaveDialog(Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
+            File file = fileChooser.showSaveDialog(primaryStage);
 
             if (file != null) {
                 String textFile = "";
@@ -141,7 +148,6 @@ public class ControllerInterface implements Initializable {
                 }
                 saveTextToFile(textFile, file);
             }
-        }
     }
 
     /**
@@ -149,9 +155,7 @@ public class ControllerInterface implements Initializable {
      *
      * @param mouseEvent
      */
-    public void btnOpenFile(MouseEvent mouseEvent) throws IOException {
-
-        if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
+    public void btnOpenFile() throws IOException {
 
             for(Box box : boxes) {
                 drawingPane.getChildren().remove(box.getRectangle());
@@ -165,7 +169,7 @@ public class ControllerInterface implements Initializable {
             fileChooser.getExtensionFilters().addAll(
                     new FileChooser.ExtensionFilter("Files",
                             "*.txt", "*.json")); // limit fileChooser options to image files
-            File selectedFile = fileChooser.showOpenDialog(Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
+            File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
             if (selectedFile != null) {
 
@@ -206,7 +210,6 @@ public class ControllerInterface implements Initializable {
             } else {
                 System.out.println("Image file selection cancelled.");
             }
-        }
     }
 
     private void saveTextToFile(String content, File file) {
@@ -220,16 +223,20 @@ public class ControllerInterface implements Initializable {
         }
     }
 
-    public void btnAddImage(MouseEvent mouseEvent) throws MalformedURLException {
-
-        if (mouseEvent.getEventType().getName().equals("MOUSE_CLICKED")) {
+    public void btnAddImage() throws MalformedURLException {
+        for(Box box : boxes) {
+            drawingPane.getChildren().remove(box.getRectangle());
+        }
+        toolBoxes.clear();
+        boxes.clear();
+        repaintLabels();
 
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Select Image File");
             fileChooser.getExtensionFilters().addAll(
                     new FileChooser.ExtensionFilter("Image Files",
                             "*.bmp", "*.png", "*.jpg", "*.gif")); // limit fileChooser options to image files
-            File selectedFile = fileChooser.showOpenDialog(Stage.class.cast(Control.class.cast(mouseEvent.getSource()).getScene().getWindow()));
+            File selectedFile = fileChooser.showOpenDialog(primaryStage);
 
             if (selectedFile != null) {
 
@@ -242,7 +249,6 @@ public class ControllerInterface implements Initializable {
             } else {
                 System.out.println("Image file selection cancelled.");
             }
-        }
     }
 
     private void enableDrawing() {
@@ -256,14 +262,14 @@ public class ControllerInterface implements Initializable {
 
         imageView.setOnMousePressed(event -> {
             if(shouldDrawNewBox)
-                currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY());
+                currentBox = new Box(drawingPane, event.getSceneX(), event.getSceneY()-25);
         });
 
         System.out.println(realWidth + " " + realHeight);
         imageView.setOnMouseDragged(event -> {
             if(shouldDrawNewBox) {
-                if (event.getSceneX() < realWidth + 10 && event.getSceneY() < realHeight + 25 && event.getSceneX() > 10 && event.getSceneY() > 25) {
-                    currentBox.render(event.getSceneX(), event.getSceneY());
+                if (event.getSceneX() < realWidth + 10 && (event.getSceneY()-25) < realHeight+15 && event.getSceneX() > 10 && (event.getSceneY()-25) > 15) {
+                    currentBox.render(event.getSceneX(), event.getSceneY()-25);
                 }
             }
         });
@@ -271,6 +277,7 @@ public class ControllerInterface implements Initializable {
         imageView.setOnMouseReleased(event -> {
             if(shouldDrawNewBox)
                 toolbox(currentBox);
+                save.setVisible(true);
         });
     }
 
@@ -290,7 +297,7 @@ public class ControllerInterface implements Initializable {
 
         // Set toolbox above rectangle
         fenetre.setX(currentBox.getRectangle().getX() + primaryStage.getX());
-        fenetre.setY(currentBox.getRectangle().getY() + primaryStage.getY() - 50);
+        fenetre.setY(currentBox.getRectangle().getY() + primaryStage.getY() - 25);
 
         gridPane.setAlignment(Pos.CENTER);
         gridPane.setHgap(10);
@@ -341,5 +348,32 @@ public class ControllerInterface implements Initializable {
         fenetre.setScene(scene);
         fenetre.show();
     }
+
+    @FXML
+    private void fileQuit() {
+        System.exit(0);
+        Platform.exit();
+    }
+
+    @FXML
+    private void goToGithub() throws IOException, URISyntaxException {
+        String urlString = "https://github.com/Robel-T/IHM-PRO-I";
+        Desktop.getDesktop().browse(new URI(urlString));
+    }
+
+    @FXML
+    private void addImage(){
+        try {
+            btnAddImage();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void exportImage(){
+            btnSaveFile();
+    }
+
 }
 

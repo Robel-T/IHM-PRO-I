@@ -25,6 +25,7 @@ public class Box {
 
         this.rectangle = new Rectangle();
         rectangle.setFill(Color.TRANSPARENT);
+        rectangle.setStyle("-fx-stroke-width: 3");
         color = Color.rgb(random.nextInt(255), random.nextInt(255), random.nextInt(255), 1);
         rectangle.setStroke(color);
         this.drawingPane.getChildren().add(rectangle);
