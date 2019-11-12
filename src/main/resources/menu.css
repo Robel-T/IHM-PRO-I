@@ -1,0 +1,19 @@
+
+
+.menu-button .label {
+    -fx-text-fill:white;
+}
+
+.context-menu {
+    -fx-background-color: linear-gradient(#38424b 0%, #1f2429 20%, #2B2B2B 100%, #1f2429 20%, #38424b 0%)
+}
+
+.menu-bar .label {
+    -fx-text-fill: white;
+    -fx-opacity: 0.9;
+}
+
+.menu .left-container {
+    -fx-background-color: black;
+}
+
