@@ -20,7 +20,7 @@ public class InterfaceMain extends Application {
         FXMLLoader loader = new FXMLLoader();
         Parent root = (Parent) loader.load(getClass().getResource("main.fxml").openStream());
         primaryStage.setResizable(true);
-        primaryStage.setTitle("Image annotation");
+        primaryStage.setTitle("EdiThor");
         primaryStage.setScene(new Scene(root, 1000, 600));
         primaryStage.show();
 

@@ -299,10 +299,8 @@ public class ControllerInterface implements Initializable {
         }
         gridPane = new GridPane();
 
-        // ToolboxInterface toolboxInterface = new ToolboxInterface(currentBox);
         Stage fenetre = new Stage();
 
-        //toolboxInterface.start(stage);
         fenetre.setTitle("ToolBox");
         fenetre.initStyle(StageStyle.UNDECORATED);
         fenetre.setResizable(false);
@@ -358,6 +356,7 @@ public class ControllerInterface implements Initializable {
 
         final Scene scene = new Scene(gridPane);
         fenetre.setScene(scene);
+        fenetre.initOwner(primaryStage);
         fenetre.show();
     }
 
