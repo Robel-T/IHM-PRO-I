@@ -282,8 +282,10 @@ public class ControllerInterface implements Initializable {
         });
 
         imageView.setOnMouseReleased(event -> {
-            if(shouldDrawNewBox)
-                toolbox(currentBox);
+            if(shouldDrawNewBox) {
+                if (currentBox.getRectangle().getHeight() > 0)
+                    toolbox(currentBox);
+            }
             save.setVisible(true);
         });
     }
@@ -292,6 +294,11 @@ public class ControllerInterface implements Initializable {
 
         shouldDrawNewBox = false;
 
+        for(Stage toolBox : toolBoxes) {
+            if(!toolBox.equals(currentToolBox)) {
+                toolBox.hide();
+            }
+        }
         gridPane = new GridPane();
 
         // ToolboxInterface toolboxInterface = new ToolboxInterface(currentBox);
