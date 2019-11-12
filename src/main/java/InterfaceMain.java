@@ -1,5 +1,6 @@
 import Controller.ControllerInterface;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -25,5 +26,10 @@ public class InterfaceMain extends Application {
 
         ControllerInterface mainController = loader.getController();
         mainController.setPrimaryStage(primaryStage);
+
+        primaryStage.setOnCloseRequest((we -> {
+            Platform.exit();
+            System.exit(0);
+        }));
     }
 }

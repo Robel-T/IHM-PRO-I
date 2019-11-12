@@ -130,7 +130,6 @@ public class ControllerInterface implements Initializable {
     /**
      * Save current file
      *
-     * @param mouseEvent
      */
     public void btnSaveFile() {
 
@@ -157,7 +156,6 @@ public class ControllerInterface implements Initializable {
     /**
      * Open a file, parse and render it
      *
-     * @param mouseEvent
      */
     public void btnOpenFile() throws IOException {
 
